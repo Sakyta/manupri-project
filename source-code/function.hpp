@@ -5,6 +5,24 @@
 #include "../data-structures/stack.hpp"
 #include "global-menu.hpp"
 #include <iomanip>
+#include <limits>
+
+std::string make_rupiah(long long angka)
+{
+    std::string output = std::to_string(angka);
+    int panjang = output.length();
+    int jumlah_titik = panjang / 3;
+
+    for (int i = 1; i <= jumlah_titik; i++)
+    {
+        if (panjang != 3 * i)
+        {
+            output.insert(panjang - (3 * i), ".");
+        }
+    }
+
+    return output;
+}
 
 list makeBudgeting()
 {
@@ -48,11 +66,11 @@ void getPercentage(list &head)
     int inputNumber, input;
 
     std::cout << "[Manupri]\n\n"
-              << "[Input Budgeting]\n\n";
+              << "[Budgeting]\n\n";
 
     if (head != nullptr)
     {
-        std::cout << "Kamu Udah Set Budget Kamu Kok!\n";
+        std::cout << "Kamu Udah Set Budget Kamu!\n";
         printBudgeting(head);
         std::cout << "\n(1) Edit Budgeting\n";
         std::cout << "(2) Kembali\n\n>> ";
@@ -76,7 +94,7 @@ void getPercentage(list &head)
     {
         if (counter <= 0)
         {
-            massage_handling("Budget Sudah Terbagi Rata");
+            massage_handling("Budget Sudah Terbagi Rata\n");
             return;
         }
 
@@ -90,14 +108,16 @@ void getPercentage(list &head)
         }
         else
         {
-            error_handling("Budget Tidak Dapat Dibagi Rata");
-            head == nullptr;
+            std::cout << "\n";
+            error_handling("Budget Tidak Dapat Dibagi Rata\n");
+            head = nullptr;
             return getPercentage(head);
         }
 
         temp = temp->next;
     }
 
+    std::cout << "\n";
     refresh_ui();
 }
 
@@ -141,15 +161,31 @@ void getBill(queue &q)
     std::string label;
     int priority;
 
-    std::cout << "Tagihan Apa\n>> ";
+    std::cout << "Nama Tagihan\n>> ";
     std::cin.ignore();
     std::getline(std::cin, label);
-    std::cout << "Tagihannya Berapa\n>> ";
+    std::cout << "Besaran Tagihan\n>> ";
     std::cin >> besaran;
+
+    if (std::cin.fail())
+    {
+        std::cout << "\n";
+        error_handling("Input Harus Merupakan Angka!\n");
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+        std::cout << "[Manupri]\n\n"
+                  << "[Input Tagihan]\n\n";
+        return getBill(q);
+    }
 
     if (besaran < 0)
     {
-        error_handling("Besaran Harus Positif");
+        std::cout << "\n";
+        error_handling("Besaran Harus Positif\n");
+
+        std::cout << "[Manupri]\n\n"
+                  << "[Input Tagihan]\n\n";
         return getBill(q);
     }
     getPriority(priority);
@@ -157,10 +193,11 @@ void getBill(queue &q)
     createQueueElement(newQ, besaran, label, priority);
     enqueue(q, newQ);
 
+    std::cout << "\n";
     refresh_ui();
 }
 
-void print_main_menu(long long data)
+void print_main_menu(double data)
 {
     if (data == 0)
     {
@@ -168,11 +205,11 @@ void print_main_menu(long long data)
     }
     else
     {
-        std::cout << "Rp " << std::to_string(data);
+        std::cout << "Rp " << make_rupiah(data);
     }
 }
 
-void printTagihan(queue &q)
+void printTagihan(queue q)
 {
     pointerQ current = q.head;
     int count = 1;
@@ -180,12 +217,15 @@ void printTagihan(queue &q)
     const int countWidth = 5;
     const int labelWidth = 20;
     const int besaranWidth = 16;
+    const int bulanWidth = 11;
 
     if (q.head == nullptr)
     {
         massage_handling("Belum Ada Tagihan!\n");
         return;
     }
+
+    std::cout << "Tagihan Bulan Ini\n\n";
 
     std::cout << std::left << std::setw(countWidth) << "No."
               << std::setw(besaranWidth) << "Besaran Tagihan"
@@ -194,13 +234,54 @@ void printTagihan(queue &q)
 
     while (current != nullptr)
     {
-        std::cout << std::setw(countWidth) << count
-                  << std::setw(besaranWidth) << current->besaran
-                  << std::setw(current->label.length()) << current->label
+        if (current->priority > 1)
+        {
+            std::cout << "Belum Ada Tagihan!\n";
+            break;
+        }
+        if (current->priority == 1)
+        {
+            std::cout << std::setw(countWidth) << count
+                      << std::setw(besaranWidth) << make_rupiah(current->besaran)
+                      << std::setw(current->label.length()) << current->label
+                      << "\n";
+
+            current = current->next;
+            count++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    
+    if (current == nullptr)
+    {
+        std::cout << "\nTagihan Bulan Selanjutnya\n\b";
+        std::cout << "Belum Ada Tagihan!\n";
+    }
+    else
+    {
+        count = 1;
+        std::cout << "\nTagihan Bulan Selanjutnya\n";
+
+        std::cout << std::left << std::setw(countWidth) << "No."
+                  << std::setw(besaranWidth) << "Besaran Tagihan"
+                  << std::setw(bulanWidth) << "Sisa Bulan"
+                  << std::setw(labelWidth) << "Keterangan Tagihan"
                   << "\n";
 
-        current = current->next;
-        count++;
+        while (current != nullptr)
+        {
+            std::cout << std::setw(countWidth) << count
+                      << std::setw(besaranWidth) << make_rupiah(current->besaran)
+                      << std::setw(bulanWidth) << current->priority - 1
+                      << std::setw(current->label.length()) << current->label
+                      << "\n";
+
+            current = current->next;
+            count++;
+        }
     }
     std::cout << "\n";
 
@@ -255,6 +336,12 @@ stack make_operand(list head, queue q)
 
 void calculate(list head, queue q, long long income)
 {
+    if (income == 0)
+    {
+        error_handling("Mohon Input Pemasukkan Anda Terlebih Dahulu!\n");
+        return;
+    }
+
     if (head == nullptr)
     {
         error_handling("Mohon Buat Budgeting Terlebih Dahulu!\n");
@@ -285,8 +372,9 @@ void calculate(list head, queue q, long long income)
         }
     }
 
-    std::cout << "Keuangan Kamu Bulan Ini Adalah : " << std::to_string(income) << "\n\n";
+    std::cout << "Keuangan Kamu Bulan Ini Adalah : Rp " << make_rupiah(income) << "\n\n";
 
+    long long sisa;
     while (label != nullptr)
     {
         if (temp == nullptr)
@@ -294,11 +382,18 @@ void calculate(list head, queue q, long long income)
             break;
         }
         long long perhitungan = (temp->operand * income) / 100;
-        std::cout << "Keuangan Kamu Untuk " << label->label << " Adalah : " << std::to_string(perhitungan) << "\n";
+        sisa += perhitungan;
+        std::cout << "Keuangan Kamu Untuk " << label->label << " Adalah : Rp " << make_rupiah(perhitungan) << "\n";
 
         label = label->next;
         temp = temp->next;
     }
+
+    if (sisa != income)
+    {
+        std::cout << "\nSisa Uang Kamu Sebesar : Rp " << income - sisa << "\n\n";
+    }
     
+    std::cout << "\n";
     refresh_ui();
 }
