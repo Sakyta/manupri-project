@@ -232,11 +232,15 @@ void printTagihan(queue q)
               << std::setw(labelWidth) << "Keterangan Tagihan"
               << "\n";
 
+    if (current->priority > 1)
+    {
+        std::cout << "Belum Ada Tagihan!\n";
+    }
+
     while (current != nullptr)
     {
         if (current->priority > 1)
         {
-            std::cout << "Belum Ada Tagihan!\n";
             break;
         }
         if (current->priority == 1)
@@ -257,13 +261,13 @@ void printTagihan(queue q)
     
     if (current == nullptr)
     {
-        std::cout << "\nTagihan Bulan Selanjutnya\n\b";
+        std::cout << "\nTagihan Bulan Selanjutnya\n\n";
         std::cout << "Belum Ada Tagihan!\n";
     }
     else
     {
         count = 1;
-        std::cout << "\nTagihan Bulan Selanjutnya\n";
+        std::cout << "\nTagihan Bulan Selanjutnya\n\n";
 
         std::cout << std::left << std::setw(countWidth) << "No."
                   << std::setw(besaranWidth) << "Besaran Tagihan"
@@ -273,9 +277,10 @@ void printTagihan(queue q)
 
         while (current != nullptr)
         {
+            int bulan = current->priority - 1;
             std::cout << std::setw(countWidth) << count
                       << std::setw(besaranWidth) << make_rupiah(current->besaran)
-                      << std::setw(bulanWidth) << current->priority - 1
+                      << std::setw(bulanWidth) << bulan
                       << std::setw(current->label.length()) << current->label
                       << "\n";
 
@@ -297,7 +302,7 @@ void insertForSubtracting(stack &top, stack &newStack, pointerQ q)
 void insertForTimes(stack &top, stack &newStack, list head)
 {
     createStackElement(newStack, head->persenan);
-    pushBack(top, newStack);
+    push(top, newStack);
 }
 
 stack make_operand(list head, queue q)
@@ -307,7 +312,21 @@ stack make_operand(list head, queue q)
 
     pointerQ temp = q.head;
     stack nStack;
-    
+
+    list tempL = head;
+
+    while (tempL->next != nullptr)
+    {
+        tempL = tempL->next;
+    }
+
+    while (tempL != nullptr)
+    {
+        insertForTimes(operation, nStack, tempL);
+
+        tempL = tempL->prev;
+    }
+
     while (temp != nullptr)
     {
         if (temp->priority != 1)
@@ -320,15 +339,6 @@ stack make_operand(list head, queue q)
 
             temp = temp->next;
         }
-    }
-
-    list tempL = head;
-
-    while (tempL != nullptr)
-    {
-        insertForTimes(operation, nStack, tempL);
-
-        tempL = tempL->next;
     }
 
     return operation;

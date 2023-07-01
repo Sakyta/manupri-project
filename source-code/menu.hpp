@@ -2,14 +2,14 @@
 
 #include "function.hpp"
 
-void menu_input_pemasukkan(double &pemasukkan)
+void menu_input_pemasukkan(long long &pemasukkan)
 {
     std::cout << "[Manupri]\n\n";
     int input;
     if (pemasukkan != 0)
     {
         std::cout << "[Edit/Tambah Pemasukkan]\n\n";
-        std::cout << "Pemasukkan Kamu Bulan Ini Adalah : Rp " << pemasukkan << "\n";
+        std::cout << "Pemasukkan Kamu Bulan Ini Adalah : Rp " << make_rupiah(pemasukkan) << "\n";
         std::cout << "\n(1) Edit Pemasukkan\n";
         std::cout << "(2) Tambah Pemasukkan\n";
         std::cout << "(3) Kembali\n\n>> ";
@@ -78,7 +78,7 @@ void menu_cek_tagihan(queue q)
     printTagihan(q);
 }
 
-void menu_calculate(list head, queue q, double &income)
+void menu_calculate(list head, queue q, long long &income)
 {
     std::cout << "[Manupri]\n\n"
               << "[Calculate]\n\n";
@@ -87,7 +87,7 @@ void menu_calculate(list head, queue q, double &income)
 
 void menu()
 {
-    double pemasukkan = 0;
+    long long pemasukkan = 0;
     queue tagihan;
     createQueue(tagihan);
     list budget;

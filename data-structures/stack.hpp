@@ -56,27 +56,3 @@ long long pop(stack &top)
 
     return num;
 }
-
-void getBottomStack(stack top, stack &curr)
-{
-    curr = top ;
-
-    while (curr->next != nullptr)
-    {
-        curr = curr->next;
-    }
-}
-
-void pushBack(stack &top, stack newStack)
-{
-    stack end = top;
-    if (top == nullptr)
-    {
-        top = newStack;
-    }
-    else
-    {
-        getBottomStack(top, end);
-        end->next = newStack;
-    }
-}
